@@ -12,22 +12,6 @@
 
 #define MODT 562
 
-void blink (int num){
-	int i;
-	// Initialize LED
-	gpio_init(LED_PIN);
-	gpio_set_dir(LED_PIN, GPIO_OUT);
-	while (true) {
-		for(i=0;i<num;i++){
-			gpio_put(LED_PIN, 1);
-			sleep_ms(200);
-			gpio_put(LED_PIN, 0);
-			sleep_ms(200);
-		}
-		sleep_ms(500);
-	}
-}
-
 void emit (unsigned int data, bool repeat){
 	int i;
 	// Allocate GPIO to the PWM
