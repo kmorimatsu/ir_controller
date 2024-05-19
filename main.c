@@ -25,30 +25,38 @@ void emit (unsigned int data, bool repeat){
 	// Enable
 	pwm_set_enabled(PWM_SLICE, true);
 	
-	do {
-		// Begin
-		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-		sleep_us(MODT*16);
-		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
-		sleep_us(MODT*8);
-		
-		// Send data
-		for(i=0;i<32;i++){
-			pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-			sleep_us(MODT);
-			pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
-			if (data & 0x80000000) sleep_us(MODT*3);
-			else sleep_us(MODT);
-			data<<=1;
-		}
-		
-		// End
+	// Begin
+	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+	sleep_us(MODT*16);
+	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+	sleep_us(MODT*8);
+	
+	// Send data
+	for(i=0;i<32;i++){
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
 		sleep_us(MODT);
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
-		
+		if (data & 0x80000000) sleep_us(MODT*3);
+		else sleep_us(MODT);
+		data<<=1;
+	}
+	
+	// End
+	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+	sleep_us(MODT);
+	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+	
+	// Repeat if needed
+	while (repeat) {
 		sleep_ms(100);
-	} while (repeat);
+		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+		sleep_us(MODT*16);
+		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+		sleep_us(MODT*4);
+		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+		sleep_us(MODT);
+		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+	}
 	
 	// Done
 	pwm_set_enabled(PWM_SLICE, false);
