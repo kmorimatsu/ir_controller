@@ -41,51 +41,54 @@ void wait108(void){
 
 void emit (unsigned int data, bool repeat){
 	int i;
-	// Allocate GPIO to the PWM
-	gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
+	gpio_init(PWM_PORT);
+	gpio_set_dir(PWM_PORT,GPIO_OUT);
+	gpio_put(PWM_PORT,0);
+	// Allocate GPIO to the SIO (not PWM yet)
+	gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
 	// Set clock divier for frequency
 	pwm_set_clkdiv(PWM_SLICE,125000.0/38000.0);
 	// 1000 cycles PWM
 	pwm_set_wrap(PWM_SLICE, 1000);
-	// Set duty to zero
-	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+	// Set duty to 33.3%
+	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
 	// Enable
 	pwm_set_enabled(PWM_SLICE, true);
 	
 	// Begin
 	wait108();
 	wait562(0);
-	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+	gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
 	wait562(MODT*16);
-	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+	gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
 	wait562(MODT*8);
 	
 	// Send data
 	for(i=0;i<32;i++){
-		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+		gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
 		wait562(MODT);
-		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+		gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
 		if (data & 0x80000000) wait562(MODT*3);
 		else wait562(MODT);
 		data<<=1;
 	}
 	
 	// End
-	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+	gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
 	wait562(MODT);
-	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+	gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
 	
 	// Repeat if needed
 	while (repeat) {
 		wait108();
 		wait562(0);
-		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+		gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
 		wait562(MODT*16);
-		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+		gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
 		wait562(MODT*4);
-		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+		gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
 		wait562(MODT);
-		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
+		gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
 	}
 	
 	// Done
