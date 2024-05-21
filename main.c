@@ -34,7 +34,7 @@ void wait108(void){
 		prev=time_us_32();
 		return;
 	}
-	target=prev+108;
+	target=prev+108000;
 	while(time_us_32()<target) sleep_us(100);
 	prev=target;
 }
@@ -53,6 +53,7 @@ void emit (unsigned int data, bool repeat){
 	pwm_set_enabled(PWM_SLICE, true);
 	
 	// Begin
+	wait108();
 	wait562(0);
 	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
 	wait562(MODT*16);
@@ -76,7 +77,7 @@ void emit (unsigned int data, bool repeat){
 	
 	// Repeat if needed
 	while (repeat) {
-		sleep_ms(100);
+		wait108();
 		wait562(0);
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
 		wait562(MODT*16);
