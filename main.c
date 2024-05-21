@@ -12,6 +12,33 @@
 
 #define MODT 562
 
+void wait562(int usecs){
+	static unsigned int prev=0;
+	unsigned int target;
+	if (0==usecs) {
+		// Init
+		prev=time_us_32();
+		return;
+	}
+	if (2<usecs) sleep_us(usecs-2);
+	target=prev+usecs;
+	while(time_us_32()<target);
+	prev=target;
+}
+
+void wait108(void){
+	static unsigned int prev=0;
+	unsigned int target;
+	if (!prev) {
+		// Init
+		prev=time_us_32();
+		return;
+	}
+	target=prev+108;
+	while(time_us_32()<target) sleep_us(100);
+	prev=target;
+}
+
 void emit (unsigned int data, bool repeat){
 	int i;
 	// Allocate GPIO to the PWM
@@ -26,35 +53,37 @@ void emit (unsigned int data, bool repeat){
 	pwm_set_enabled(PWM_SLICE, true);
 	
 	// Begin
+	wait562(0);
 	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-	sleep_us(MODT*16);
+	wait562(MODT*16);
 	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
-	sleep_us(MODT*8);
+	wait562(MODT*8);
 	
 	// Send data
 	for(i=0;i<32;i++){
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-		sleep_us(MODT);
+		wait562(MODT);
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
-		if (data & 0x80000000) sleep_us(MODT*3);
-		else sleep_us(MODT);
+		if (data & 0x80000000) wait562(MODT*3);
+		else wait562(MODT);
 		data<<=1;
 	}
 	
 	// End
 	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-	sleep_us(MODT);
+	wait562(MODT);
 	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
 	
 	// Repeat if needed
 	while (repeat) {
 		sleep_ms(100);
+		wait562(0);
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-		sleep_us(MODT*16);
+		wait562(MODT*16);
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
-		sleep_us(MODT*4);
+		wait562(MODT*4);
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-		sleep_us(MODT);
+		wait562(MODT);
 		pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 0);
 	}
 	
