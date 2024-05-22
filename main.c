@@ -39,6 +39,18 @@ void wait108(void){
 	prev=target;
 }
 
+#define start_pwm() do {\
+	pwm_set_counter(PWM_SLICE,0);\
+	gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);\
+	pwm_set_enabled(PWM_SLICE, true);\
+} while (false)
+
+#define stop_pwm() do {\
+	gpio_put(PWM_PORT,0);\
+	gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);\
+	pwm_set_enabled(PWM_SLICE, false);\
+} while (false)
+
 void emit (unsigned int data, bool repeat){
 	int i;
 	gpio_init(PWM_PORT);
@@ -52,43 +64,43 @@ void emit (unsigned int data, bool repeat){
 	pwm_set_wrap(PWM_SLICE, 1000);
 	// Set duty to 33.3%
 	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-	// Enable
-	pwm_set_enabled(PWM_SLICE, true);
+	// Stop PWM in the beginning
+	stop_pwm();
 	
 	// Begin
 	wait108();
 	wait562(0);
-	gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
+	start_pwm();
 	wait562(MODT*16);
-	gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
+	stop_pwm();
 	wait562(MODT*8);
 	
 	// Send data
 	for(i=0;i<32;i++){
-		gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
+		start_pwm();
 		wait562(MODT);
-		gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
+		stop_pwm();
 		if (data & 0x80000000) wait562(MODT*3);
 		else wait562(MODT);
 		data<<=1;
 	}
 	
 	// End
-	gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
+	start_pwm();
 	wait562(MODT);
-	gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
+	stop_pwm();
 	
 	// Repeat if needed
 	while (repeat) {
 		wait108();
 		wait562(0);
-		gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
+		start_pwm();
 		wait562(MODT*16);
-		gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
+		stop_pwm();
 		wait562(MODT*4);
-		gpio_set_function(PWM_PORT, GPIO_FUNC_PWM);
+		start_pwm();
 		wait562(MODT);
-		gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
+		stop_pwm();
 	}
 	
 	// Done
