@@ -53,12 +53,20 @@ void wait108(void){
 
 void emit (unsigned int data, bool repeat){
 	int i;
-	// Stop PWM first
+	// Fake signal in the beginning	
+	stop_pwm();
+	wait562(0);
+	start_pwm();
+	wait562(MODT*2);
+	stop_pwm();
+	wait562(MODT*2);
+	start_pwm();
+	wait562(MODT*2);
 	stop_pwm();
 	
 	// Begin
 	wait108();
-	wait562(0);
+	wait562(MODT*2);
 	start_pwm();
 	wait562(MODT*16);
 	stop_pwm();
