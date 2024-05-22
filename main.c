@@ -53,18 +53,7 @@ void wait108(void){
 
 void emit (unsigned int data, bool repeat){
 	int i;
-	gpio_init(PWM_PORT);
-	gpio_set_dir(PWM_PORT,GPIO_OUT);
-	gpio_put(PWM_PORT,0);
-	// Allocate GPIO to the SIO (not PWM yet)
-	gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
-	// Set clock divier for frequency
-	pwm_set_clkdiv(PWM_SLICE,125000.0/38000.0);
-	// 1000 cycles PWM
-	pwm_set_wrap(PWM_SLICE, 1000);
-	// Set duty to 33.3%
-	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
-	// Stop PWM in the beginning
+	// Stop PWM first
 	stop_pwm();
 	
 	// Begin
@@ -115,6 +104,21 @@ int main() {
 	for(i=0;i<29;i++){
 		if (BUTTON_INPUT_MASK & (1<<i)) gpio_pull_down(i);
 	}
+	// Initialize PWM
+	gpio_init(PWM_PORT);
+	gpio_set_dir(PWM_PORT,GPIO_OUT);
+	gpio_put(PWM_PORT,0);
+	// Allocate GPIO to the SIO (not PWM yet)
+	gpio_set_function(PWM_PORT, GPIO_FUNC_SIO);
+	// Set clock divier for frequency
+	pwm_set_clkdiv(PWM_SLICE,125000.0/38000.0);
+	// 1000 cycles PWM
+	pwm_set_wrap(PWM_SLICE, 1000);
+	// Set duty to 33.3%
+	pwm_set_chan_level(PWM_SLICE, PWM_CHANNEL, 333);
+	// Enable PWM
+	pwm_set_enabled(PWM_SLICE, true);;
+	
 	// Wait for 30 msecs
 	sleep_ms(30);
 	// Check button
